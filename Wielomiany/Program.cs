@@ -1,53 +1,53 @@
-﻿using System.Numerics;
+﻿using Wielomiany;
 
+var filePath = Console.ReadLine();
+if (filePath is null)
+    throw new ArgumentNullException(nameof(filePath));
+
+if (!File.Exists(filePath))
+{
+    Console.WriteLine("Plik nie istnieje.");
+    return;
+}
+
+var content = File.ReadAllBytes(filePath);
+
+// generuj wielomiany dla GF(2^8)
 int degree = 8;
-var coefficients = GenerateCoefficients(degree);
-
-coefficients
-   .Where(c => IsIrreducible(c, degree))
-   .ToList()
-   .ForEach(c => Console.WriteLine(Convert.ToString(c, 2)));
-
-static IEnumerable<int> GenerateCoefficients(int degree)
+var coefficients = IrreducibleFinder.GenerateCoefficients(degree).ToList();
+if (coefficients.Count == 0)
 {
-    int start = 1 << degree;
-    int count = 1 << (degree + 1);
-
-    return Enumerable.Range(start, count - start);
+    Console.WriteLine("Brak wygenerowanych wielomianów.");
+    return;
 }
 
-static bool IsIrreducible(int poly, int degree)
-{
-    for (int d = 1; d <= degree / 2; d++)
-    {
-        int start = 1 << d;
-        int count = 1 << (d + 1);
+// wybierz wielomian nieredukowalny jako wielomian redukujący (pierwszy z listy)
+int irreducible = coefficients.First(x => IrreducibleFinder.IsIrreducible(x, degree));
+var polyCalc = new PolynomialsCalculator(irreducible);
 
-        for (int factor = start; factor < count; factor++)
-        {
-            if (Mod(poly, factor) == 0)
-                return false; // rozkładalny
-        }
-    }
-    return true; // nierozkładalny
+// znajdź a != 0,1 oraz odpowiadające b != 0 (odwrotność w GF(2^8))
+int a = 0, b = 0;
+foreach (var candidate in coefficients)
+{
+    if (candidate == 0 || candidate == 1) continue;
+    int inv = polyCalc.FindReverse(candidate, coefficients);
+    if (inv != 0) { a = candidate; b = inv; break; }
 }
 
-// Dzielenie wielomianów nad GF(2) — zwraca resztę
-static int Mod(int dividend, int divisor)
+if (a == 0 || b == 0)
 {
-    int degDiv = Degree(divisor);
-    int degRem = Degree(dividend);
-
-    while (degRem >= degDiv)
-    {
-        dividend ^= divisor << (degRem - degDiv);
-        degRem = Degree(dividend);
-    }
-    return dividend;
+    Console.WriteLine("Nie znaleziono dopasowanych wartości a i b.");
+    return;
 }
 
-// Stopień wielomianu (najwyższy bit)
-static int Degree(int poly)
-{
-    return poly == 0 ? -1 : BitOperations.Log2((uint)poly);
-}
+// zaszyfruj i zapisz wynik
+var crypter = new Crypter();
+var encrypted = crypter.Cipher(content, a, b, polyCalc);
+string outPath = filePath + ".enc";
+File.WriteAllBytes(outPath, encrypted);
+
+Console.WriteLine($"Plik zaszyfrowany: {outPath} (p={Convert.ToString(irreducible, 2)}, a={a}, b={b})");
+
+var decrypted = crypter.Decipher(encrypted, a, b, polyCalc, coefficients);
+string decPath = "/Users/danielkocot/Downloads/dec_" + Path.GetFileName(filePath);
+File.WriteAllBytes(decPath, decrypted);
