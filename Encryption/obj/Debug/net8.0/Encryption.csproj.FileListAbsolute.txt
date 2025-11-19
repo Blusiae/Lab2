@@ -1,0 +1,11 @@
+/Users/danielkocot/Library/CloudStorage/OneDrive-PolitechnikaŚląska/Projects/Lab2/Encryption/obj/Debug/net8.0/Encryption.GeneratedMSBuildEditorConfig.editorconfig
+/Users/danielkocot/Library/CloudStorage/OneDrive-PolitechnikaŚląska/Projects/Lab2/Encryption/obj/Debug/net8.0/Encryption.AssemblyInfoInputs.cache
+/Users/danielkocot/Library/CloudStorage/OneDrive-PolitechnikaŚląska/Projects/Lab2/Encryption/obj/Debug/net8.0/Encryption.AssemblyInfo.cs
+/Users/danielkocot/Library/CloudStorage/OneDrive-PolitechnikaŚląska/Projects/Lab2/Encryption/obj/Debug/net8.0/Encryption.csproj.CoreCompileInputs.cache
+/Users/danielkocot/Library/CloudStorage/OneDrive-PolitechnikaŚląska/Projects/Lab2/Encryption/obj/Debug/net8.0/Encryption.sourcelink.json
+/Users/danielkocot/Library/CloudStorage/OneDrive-PolitechnikaŚląska/Projects/Lab2/Encryption/bin/Debug/net8.0/Encryption
+/Users/danielkocot/Library/CloudStorage/OneDrive-PolitechnikaŚląska/Projects/Lab2/Encryption/bin/Debug/net8.0/Encryption.dll
+/Users/danielkocot/Library/CloudStorage/OneDrive-PolitechnikaŚląska/Projects/Lab2/Encryption/bin/Debug/net8.0/Encryption.pdb
+/Users/danielkocot/Library/CloudStorage/OneDrive-PolitechnikaŚląska/Projects/Lab2/Encryption/obj/Debug/net8.0/Encryption.dll
+/Users/danielkocot/Library/CloudStorage/OneDrive-PolitechnikaŚląska/Projects/Lab2/Encryption/obj/Debug/net8.0/refint/Encryption.dll
+/Users/danielkocot/Library/CloudStorage/OneDrive-PolitechnikaŚląska/Projects/Lab2/Encryption/obj/Debug/net8.0/Encryption.pdb
