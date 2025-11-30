@@ -37,9 +37,8 @@ public class IrreducibleFinder
 
     public static IEnumerable<int> GenerateCoefficients(int degree)
     {
-        int start = 1 << degree;
-        int count = 1 << (degree + 1);
+        int count = 1 << degree;
 
-        return Enumerable.Range(start, count - start);
+        return Enumerable.Range(1, count - 1);
     }
 }
