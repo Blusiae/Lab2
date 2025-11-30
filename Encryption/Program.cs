@@ -19,10 +19,10 @@ if (!File.Exists(filePath))
 }
 
 var content = File.ReadAllBytes(filePath);
-
+Random rd = new();
 // generuj wielomiany dla GF(2^8)
 int degree = 8;
-var coefficients = IrreducibleFinder.GenerateCoefficients(degree).ToList();
+var coefficients = IrreducibleFinder.GenerateCoefficients(degree).OrderBy(x => rd.Next()).ToList();
 if (coefficients.Count == 0)
 {
     Console.WriteLine("Brak wygenerowanych wielomianów.");
