@@ -12,13 +12,12 @@ public class IrreducibleFinder
             for (int factor = start; factor < count; factor++)
             {
                 if (Mod(poly, factor) == 0)
-                    return false; // rozkładalny
+                    return false; 
             }
         }
-        return true; // nierozkładalny
+        return true; 
     }
 
-    // Dzielenie wielomianów nad GF(2) — zwraca resztę
     public static int Mod(int dividend, int divisor)
     {
         int degDiv = PolynomialsCalculator.Degree(divisor);
@@ -31,8 +30,6 @@ public class IrreducibleFinder
         }
         return dividend;
     }
-
-    // Stopień wielomianu (najwyższy bit)
 
 
     public static IEnumerable<int> GenerateCoefficients(int degree)

@@ -1,10 +1,11 @@
-﻿using Encryption;
+﻿using System.Security.Cryptography;
+using Encryption;
 
-if((args[0] == "encrypt" && args.Length != 2) || (args[0] == "decrypt" && args.Length != 6) || (args[0] != "encrypt" && args[0] != "decrypt"))
+if((args[0] == "encrypt" && args.Length != 2) || (args[0] == "decrypt" && args.Length != 3) || (args[0] != "encrypt" && args[0] != "decrypt"))
 {
     Console.WriteLine("Usage:");
     Console.WriteLine("For encryption: dotnet run encrypt <file_path>");
-    Console.WriteLine("For decryption: dotnet run decrypt <file_path> <output_path> <a> <b> <poly>");
+    Console.WriteLine("For decryption: dotnet run decrypt <file_path> <output_path>");
     return;
 }
 
@@ -18,9 +19,8 @@ if (!File.Exists(filePath))
     return;
 }
 
-var content = File.ReadAllBytes(filePath);
+
 Random rd = new();
-// generuj wielomiany dla GF(2^8)
 int degree = 8;
 var coefficients = IrreducibleFinder.GenerateCoefficients(degree).OrderBy(x => rd.Next()).ToList();
 if (coefficients.Count == 0)
@@ -29,31 +29,32 @@ if (coefficients.Count == 0)
     return;
 }
 
-// wybierz wielomian nieredukowalny jako wielomian redukujący (pierwszy z listy)
-
-int irreducible = args[0] == "decrypt" ? 
-    int.TryParse(args[5], out int poly) ? poly : throw new ArgumentException("Niepoprawny wielomian redukujący.")
-    : coefficients.First(x => IrreducibleFinder.IsIrreducible(x, degree));
-var polyCalc = new PolynomialsCalculator(irreducible);
-
 var crypter = new Crypter();
 
 if(args[0] == "decrypt")
 {
-    if(!int.TryParse(args[3], out int a) || !int.TryParse(args[4], out int b))
-    {
-        Console.WriteLine("Niepoprawne wartości a lub b.");
-        return;
-    }   
+    await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
+    byte[] seed = new byte[16];
+    await fs.ReadExactlyAsync(seed);
+    int a = seed[4];
+    int b = seed[8];
+    int irreducible = seed[12];
+    byte[] content = new byte[fs.Length - 16];
+    await fs.ReadAsync(content);
+
+    var polyCalc = new PolynomialsCalculator(irreducible);
 
     var decrypted = crypter.Decipher(content, a, b, polyCalc, coefficients);
     string decPath = args[2];
+
     await File.WriteAllBytesAsync(decPath, decrypted);
-    Console.WriteLine($"Plik odszyfrowany: {decPath} (p={irreducible}, a={a}, b={b})");
+    Console.WriteLine($"Plik odszyfrowany: {decPath}.");
     return;
 }
 else if(args[0] == "encrypt")
 {
+    int irreducible =  coefficients.First(x => IrreducibleFinder.IsIrreducible(x, degree));
+    var polyCalc = new PolynomialsCalculator(irreducible);
     int a = 0, b = 0;
     foreach (var candidate in coefficients)
     {
@@ -67,8 +68,20 @@ else if(args[0] == "encrypt")
         Console.WriteLine("Nie znaleziono dopasowanych wartości a i b.");
         return;
     }
+
+    var content = File.ReadAllBytes(filePath);
     var encrypted = crypter.Cipher(content, a, b, polyCalc);
     string outPath = filePath + ".enc";
-    await File.WriteAllBytesAsync(outPath, encrypted);
-    Console.WriteLine($"Plik zaszyfrowany: {outPath} (p={irreducible}, a={a}, b={b})");
+
+    await using var fs = new FileStream(outPath, FileMode.Create, FileAccess.Write);
+    byte[] salt = new byte[16];
+    using var rng = RandomNumberGenerator.Create();
+    rng.GetBytes(salt);
+    salt[4] = (byte)a;
+    salt[8] = (byte)b;
+    salt[12] = (byte)irreducible;
+    await fs.WriteAsync(salt);
+    await fs.WriteAsync(encrypted); 
+
+    Console.WriteLine($"Plik zaszyfrowany: {outPath}.");
 }
